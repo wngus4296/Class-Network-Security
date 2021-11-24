@@ -20,3 +20,16 @@
 - cmd 콘솔창을 열어 "daytimetcpcli.exe 127.0.0.1" 실행
 - 시간 날짜가 제대로 출력되는지 확인
 ```
+
+### 2️⃣ socket - message
+* TCP 소켓 프로그래밍을 통한 메시지 교환
+  1. 연결이 수립되면 클라이언트는 서버에 다음 메시지를 전송, 서버는 출력
+    client-to-server message "hello server"
+    
+  2. 1번 메시지를 받은 서버가 다음 메시지를 전송, 클라이언트는 출력
+    server-to-client message "hello client"
+
+```
+- TCP 서버와 클라이언트를 생성하고 서로 메시지를 교환을 한다.
+- Port 번호 1007 (임의의 port번호 사용 가능)
+```
