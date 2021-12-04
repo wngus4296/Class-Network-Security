@@ -34,7 +34,7 @@
 - Port 번호 1007 (임의의 port번호 사용 가능)
 ```
 
-### 3️⃣ BSD sockets API 활용
+### 3️⃣ BSD sockets Programming
 * I/O multiplexing을 통한 BSD sockets API의 활용 능력 제고
 * 요구사항에 맞춘 클라이언트/서버 모델 설계 및 네트워크 프로그래밍 능력 함양
 * 사물인터넷 환경을 가정한 ‘Smart Home System’ 원격 설정 시뮬레이션 구현
