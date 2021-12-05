@@ -10,8 +10,9 @@ int main(int argc, char* argv[]) {
 	WSADATA wsadate;
 	SOCKADDR_IN serv_addr;
 	SOCKET client;
-	int str_len = 1;
+	// int str_len = 1;
 	char message[MESSAGE_BUF] = { 0 , };
+	char recvMessage[MESSAGE_BUF] = { 0, };
 
 	if (argc != 3) printf("usage: %s <IPaddress>", argv[0]);
 
@@ -28,13 +29,15 @@ int main(int argc, char* argv[]) {
 
 	while (1)
 	{
-		fputs("commander input : ", stdout);
+		fputs("\ncommander input : ", stdout);
 		fgets(message, MESSAGE_BUF, stdin);
 
-		str_len = send(client, message, strlen(message) + 1, 0);
-		int e = recv(client, message, str_len, 0);
-		message[e] = 0;
-		fputs(message, stdout);
+		send(client, message, strlen(message) + 1, 0);
+
+		int e = recv(client, recvMessage, 100, 0); // 버퍼 크기 신경쓰기
+		recvMessage[e] = 0;
+		fputs(recvMessage, stdout);
+		printf("\n");
 	}
 
 	closesocket(client);
