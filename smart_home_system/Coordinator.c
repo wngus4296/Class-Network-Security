@@ -1,5 +1,6 @@
 #include "unp.h"
 #define _CRT_SECURE_NO_WARNINGS
+// 프로젝트 속성 변경함
 
 #define BUFFER 1024 
 
@@ -19,26 +20,47 @@ boolean check_issafe(int curr_temp, int upper, int lower) {
         return 1;
 }
 
+int newTemp(char* message, char std) {
+    char* sArr[5] = { NULL, };
+    int newIndex = 0;
+    char* ptr = strtok(message, std);
+    while (ptr != NULL)
+    {
+        sArr[newIndex] = ptr;
+        newIndex++;       
+
+        ptr = strtok(NULL, " ");
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
+        if (sArr[i] != NULL)
+            newIndex = i;
+    }
+    
+    return atoi(sArr[newIndex]);
+}
+
 int main(int num, char* input[])
 {
     WSADATA wsadata;
     SOCKET server_sock, client_sock;
     SOCKADDR_IN server_add, client_add;
-    char memory_buf[BUFFER];
-    char returnMessage_buf[BUFFER];
+    char memory_buf[BUFFER] = { 0, };
+    char returnMessage_buf[BUFFER] = { 0, };
     int client_add_size;
     int sensor, count, str_len;
 
     const char* query = "QUERY";
     const char* c_upper = "CONFIGURE UPPER";
     const char* c_lower = "CONFIGURE LOWER";
-  
+
     fd_set read, copy_read;
     TIMEVAL time;
 
     // 보일러의 초기 값
     int Current_temperature = 25;
-    int Upper_bound = 30;
+    int Upper_bound = 27;
     int Lower_bound = -5;
 
     if (num != 2) error_message("input error");
@@ -89,11 +111,12 @@ int main(int num, char* input[])
                     client_add_size = sizeof(client_add);
                     client_sock = accept(server_sock, (SOCKADDR*)&client_add, &client_add_size);
                     FD_SET(client_sock, &read);
-                    printf("%d : socket is connected\n", client_sock);                    
+                    printf("%d : socket is connected\n", client_sock);
                 }
                 else
                 {
                     str_len = recv(read.fd_array[count], memory_buf, BUFFER - 1, 0);
+                    memory_buf[str_len] = 0;
                     if (str_len == 0)
                     {
                         FD_CLR(read.fd_array[count], &read);
@@ -104,23 +127,32 @@ int main(int num, char* input[])
                     {
                         if (strncmp(memory_buf, query, 5) == 0) {
                             Current_temperature = refresh_temp(Current_temperature);
-                            sprintf(returnMessage_buf, "Current temperature = %d\nUpper bound = %d\nLower bound = %d", 
+                            sprintf(returnMessage_buf, "Current temperature = %d\nUpper bound = %d\nLower bound = %d\n",
                                 Current_temperature, Upper_bound, Lower_bound);
                         }
                         else if (strncmp(memory_buf, c_upper, 15) == 0) {
-                            int index = strrchr(memory_buf, ""); // 마지막 공백 위치 이 이후가 온도
+                            if (memory_buf[22] == '-') {
+                                Upper_bound = -newTemp(memory_buf, '-');
+                            }
+                            else {
+                                Upper_bound = newTemp(memory_buf, " ");
+                            }
                         }
                         else if (strncmp(memory_buf, c_lower, 15) == 0) {
-                            int index = strrchr(memory_buf, ""); // 마지막 공백 위치 이 이후가 온도
-                            //memory_buf[22]가 "-"이면 빼기 해줘야됨;
+                            if (memory_buf[22] == '-') {
+                                Lower_bound = -newTemp(memory_buf, '-');
+                            }
+                            else {
+                                Lower_bound = newTemp(memory_buf, " ");
+                            }
                         }
-                        else {
-                            if (check_issafe(Current_temperature, Upper_bound, Lower_bound))
+                        else { // polling message
+                            if (check_issafe(Current_temperature, Upper_bound, Lower_bound) == 1)
                                 sprintf(returnMessage_buf, "safe");
                             else
                                 sprintf(returnMessage_buf, "warning");
                         }
-                        send(read.fd_array[count], returnMessage_buf, str_len, 0);
+                        send(read.fd_array[count], returnMessage_buf, strlen(returnMessage_buf), 0);
                     }
                 }
             }
@@ -128,9 +160,6 @@ int main(int num, char* input[])
     }
     closesocket(server_sock);
     WSACleanup();
-
-
-
 
     return 0;
 }
