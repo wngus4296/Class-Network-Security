@@ -1,50 +1,44 @@
+// 현재 설정 확인 및 새로운 설정 적용하는 client
+
 #include "unp.h"
 
+#define MESSAGE_BUF 1024
+#pragma warning(disable : 4996)
+
 int main(int argc, char* argv[]) {
-    int sockfd, n;
-    char state[MAXLINE + 1];
 
-    char buff[MAXLINE];
-    char message[255];
+	WSADATA wsadate;
+	SOCKADDR_IN serv_addr;
+	SOCKET client;
+	int str_len = 1;
+	char message[MESSAGE_BUF] = { 0 , };
 
-    struct sockaddr_in servaddr;
-    if (argc != 2)
-        printf("usage: %s <IPaddress>", argv[0]);
-#ifdef _WIN32
-    WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData); //Windows Sockets API Version 2.2
-#endif
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-        printf("socket error");
-    bzero(&servaddr, sizeof(servaddr)); 
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(1007); 
-    if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0)
-        printf("inet_pton error for %s", argv[1]);
-    
-    if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) < 0)
-        printf("connect error");
+	if (argc != 3) printf("usage: %s <IPaddress>", argv[0]);
 
-    while (1) {
-        printf("Input instruction: ");
-        fgets(message, 255, stdin);
+	if (WSAStartup(MAKEWORD(2, 2), &wsadate) != 0)  printf("socket error");
+	client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (client == INVALID_SOCKET) printf("socket error");
 
-        snprintf(buff, sizeof(buff), "%s\n", message);
+	memset(&serv_addr, 0, sizeof(serv_addr));
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_addr.S_un.S_addr = inet_addr(argv[1]);
+	serv_addr.sin_port = htons(atoi(argv[2]));
 
-        if (send(sockfd, buff, strlen(buff), 0) != strlen(buff)) 
-            printf("send error");
+	if (connect(client, (SOCKADDR*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR)	printf("connect error");
 
-        while ((n = recv(sockfd, state, MAXLINE, 0)) > 0) { 
-            state[n] = 0; 
-            if (fputs(state, stdout) == EOF) 
-                printf("fputs error"); 
-        }
-        if (n < 0) 
-            printf("read error");
-    }
+	while (1)
+	{
+		fputs("commander input : ", stdout);
+		fgets(message, MESSAGE_BUF, stdin);
 
-#ifdef _WIN32
-    WSACleanup();
-#endif
-    exit(0);
+		str_len = send(client, message, strlen(message) + 1, 0);
+		int e = recv(client, message, str_len, 0);
+		message[e] = 0;
+		fputs(message, stdout);
+	}
+
+	closesocket(client);
+	WSACleanup();
+
+	return 0;
 }
