@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
 	while (1)
 	{
 		ticks = time(NULL);
-		snprintf(message, sizeof(client), "%.24s\r\n", ctime(&ticks));
-		send(client, message, strlen(message) + 1, 0);
+		snprintf(message, sizeof(message), "%.24s\r\n", ctime(&ticks));
+		send(client, message, strlen(message), 0);
 
 		int e = recv(client, recvMessage, 9, 0);
 		recvMessage[e] = 0;
