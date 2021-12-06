@@ -1,6 +1,10 @@
-#include "unp.h"
 #define _CRT_SECURE_NO_WARNINGS
-// 프로젝트 속성 변경함
+#pragma comment (lib, "ws2_32.lib")
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define BUFFER 1024 
 
@@ -20,10 +24,10 @@ boolean check_issafe(int curr_temp, int upper, int lower) {
         return 1;
 }
 
-int newTemp(char* message, char std) {
+int newTemp(char* message, int isminus) {
     char* sArr[5] = { NULL, };
     int newIndex = 0;
-    char* ptr = strtok(message, std);
+    char* ptr = isminus == 0? strtok(message, " ") : strtok(message, "-");
     while (ptr != NULL)
     {
         sArr[newIndex] = ptr;
@@ -32,13 +36,7 @@ int newTemp(char* message, char std) {
         ptr = strtok(NULL, " ");
     }
 
-    for (int i = 0; i < 5; i++)
-    {
-        if (sArr[i] != NULL)
-            newIndex = i;
-    }
-    
-    return atoi(sArr[newIndex]);
+    return isminus == 0 ? atoi(sArr[2]) : atoi(sArr[1]);
 }
 
 int main(int num, char* input[])
@@ -60,7 +58,7 @@ int main(int num, char* input[])
 
     // 보일러의 초기 값
     int Current_temperature = 25;
-    int Upper_bound = 27;
+    int Upper_bound = 30;
     int Lower_bound = -5;
 
     if (num != 2) error_message("input error");
@@ -131,20 +129,22 @@ int main(int num, char* input[])
                                 Current_temperature, Upper_bound, Lower_bound);
                         }
                         else if (strncmp(memory_buf, c_upper, 15) == 0) {
-                            if (memory_buf[22] == '-') {
-                                Upper_bound = -newTemp(memory_buf, '-');
+                            int isminus = 0;
+                            if (memory_buf[22] == "-") {
+                                isminus = 1;
                             }
-                            else {
-                                Upper_bound = newTemp(memory_buf, " ");
-                            }
+                            Upper_bound = newTemp(&memory_buf, isminus);
+                            sprintf(returnMessage_buf, "Current temperature = %d\nChanged Upper bound = %d\nLower bound = %d\n",
+                                Current_temperature, Upper_bound, Lower_bound);
                         }
                         else if (strncmp(memory_buf, c_lower, 15) == 0) {
-                            if (memory_buf[22] == '-') {
-                                Lower_bound = -newTemp(memory_buf, '-');
+                            int isminus = 0;
+                            if (memory_buf[22] == "-") {
+                                isminus = 1;
                             }
-                            else {
-                                Lower_bound = newTemp(memory_buf, " ");
-                            }
+                            Lower_bound = newTemp(&memory_buf, isminus);
+                            sprintf(returnMessage_buf, "Current temperature = %d\nUpper bound = %d\nChanged Lower bound = %d\n",
+                                Current_temperature, Upper_bound, Lower_bound);
                         }
                         else { // polling message
                             if (check_issafe(Current_temperature, Upper_bound, Lower_bound) == 1)

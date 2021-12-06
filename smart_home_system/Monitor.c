@@ -1,6 +1,12 @@
 // 주기적으로 POLLING 메시지 전달하여 실시간으로 현재 상태 확인 가능
 
-#include "unp.h"
+#pragma comment (lib, "ws2_32.lib")
+#include <WinSock2.h>
+#include <Windows.h>
+#include <WS2tcpip.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define MESSAGE_BUF 1024
