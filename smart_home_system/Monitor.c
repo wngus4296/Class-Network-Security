@@ -32,10 +32,7 @@ int main(int argc, char* argv[]) {
 	serv_addr.sin_addr.S_un.S_addr = inet_addr(argv[1]);
 	serv_addr.sin_port = htons(atoi(argv[2]));
 
-	if (connect(client, (SOCKADDR*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR) {
-		printf("connect error");
-		return 0;
-	}
+	if (connect(client, (SOCKADDR*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR)	printf("connect error");
 
 	while (1)
 	{

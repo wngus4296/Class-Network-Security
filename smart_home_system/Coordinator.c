@@ -124,7 +124,7 @@ int main(int num, char* input[])
                     else
                     {
                         if (strncmp(memory_buf, query, 5) == 0) {
-                            Current_temperature = refresh_temp(Current_temperature);
+                            //Current_temperature = refresh_temp(Current_temperature);
                             sprintf(returnMessage_buf, "Current temperature = %d\nUpper bound = %d\nLower bound = %d\n",
                                 Current_temperature, Upper_bound, Lower_bound);
                         }
@@ -147,6 +147,7 @@ int main(int num, char* input[])
                                 Current_temperature, Upper_bound, Lower_bound);
                         }
                         else { // polling message
+                            Current_temperature = refresh_temp(Current_temperature);
                             if (check_issafe(Current_temperature, Upper_bound, Lower_bound) == 1)
                                 sprintf(returnMessage_buf, "safe");
                             else
