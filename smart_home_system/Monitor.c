@@ -21,18 +21,30 @@ int main(int argc, char* argv[]) {
 	char message[MESSAGE_BUF] = { 0 , };
 	char recvMessage[10] = { 0, };
 
-	if (argc != 3) printf("usage: %s <IPaddress>", argv[0]);
+	if (argc != 3) {
+		printf("usage: %s <IPaddress> <Port>", argv[0]);
+		exit(1);
+	}
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsadate) != 0)  printf("socket error");
+	if (WSAStartup(MAKEWORD(2, 2), &wsadate) != 0) {
+		printf("socket error");
+		exit(1);
+	}
 	client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (client == INVALID_SOCKET) printf("socket error");
+	if (client == INVALID_SOCKET) {
+		printf("socket error");
+		exit(1);
+	}
 
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.S_un.S_addr = inet_addr(argv[1]);
 	serv_addr.sin_port = htons(atoi(argv[2]));
 
-	if (connect(client, (SOCKADDR*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR)	printf("connect error");
+	if (connect(client, (SOCKADDR*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR) {
+		printf("connect error");
+		exit(1);
+	}
 
 	while (1)
 	{
