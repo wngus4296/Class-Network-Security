@@ -18,11 +18,20 @@ int main(int argc, char* argv[]) {
 	char message[MESSAGE_BUF] = { 0 , };
 	char recvMessage[MESSAGE_BUF] = { 0, };
 
-	if (argc != 3) printf("usage: %s <IPaddress>", argv[0]);
+	if (argc != 3) {
+		printf("usage: %s <IPaddress> <Port>", argv[0]);
+		exit(1);
+	}
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsadate) != 0)  printf("socket error");
+	if (WSAStartup(MAKEWORD(2, 2), &wsadate) != 0) {
+		printf("socket error");
+		exit(1);
+	}
 	client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (client == INVALID_SOCKET) printf("socket error");
+	if (client == INVALID_SOCKET) {
+		printf("socket error");
+		exit(1);
+	}
 
 	memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
@@ -31,7 +40,7 @@ int main(int argc, char* argv[]) {
 
 	if (connect(client, (SOCKADDR*)&serv_addr, sizeof(serv_addr)) == SOCKET_ERROR) {
 		printf("connect error");
-		return 0;
+		exit(1);
 	}
 
 	while (1)
@@ -39,8 +48,10 @@ int main(int argc, char* argv[]) {
 		fputs("\ncommander input : ", stdout);
 		fgets(message, MESSAGE_BUF, stdin);
 
-		if (send(client, message, strlen(message), 0) != strlen(message))
+		if (send(client, message, strlen(message), 0) != strlen(message)) {
 			printf("send error\n");
+			exit(1);
+		}
 
 		int e = recv(client, recvMessage, 100, 0);
 		recvMessage[e] = 0;
