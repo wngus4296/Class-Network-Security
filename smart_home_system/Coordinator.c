@@ -39,15 +39,15 @@ int newTemp(char* message, int isminus) {
     return isminus == 0 ? atoi(sArr[2]) : atoi(sArr[1]);
 }
 
-int main(int num, char* input[])
+int main(int argc, char* argv[])
 {
     WSADATA wsadata;
     SOCKET server_sock, client_sock;
-    SOCKADDR_IN server_add, client_add;
+    SOCKADDR_IN server_addr, client_addr;
     char memory_buf[BUFFER] = { 0, };
     char returnMessage_buf[BUFFER] = { 0, };
-    int client_add_size;
-    int sensor, count, str_len;
+    int client_addr_size;
+    int fdNum, count, str_len;
 
     const char* query = "QUERY";
     const char* c_upper = "CONFIGURE UPPER";
@@ -61,22 +61,33 @@ int main(int num, char* input[])
     int Upper_bound = 30;
     int Lower_bound = -5;
 
-    if (num != 2) error_message("input error");
-
-    if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0)
+    if (argc != 2) {
+        error_message("input error");
+        exit(1);
+    }
+    if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0) {
         error_message("socket init error");
+        exit(1);
+    }
     server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (server_sock == INVALID_SOCKET) error_message("socket descriptor error");
+    if (server_sock == INVALID_SOCKET) {
+        error_message("socket descriptor error");
+        exit(1);
+    }
 
-    memset(&server_add, 0, sizeof(server_add));
-    server_add.sin_family = AF_INET;
-    server_add.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
-    server_add.sin_port = htons(atoi(input[1]));
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+    server_addr.sin_port = htons(atoi(argv[1]));
 
-    if (bind(server_sock, (SOCKADDR*)&server_add, sizeof(server_add)) == SOCKET_ERROR)
+    if (bind(server_sock, (SOCKADDR*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
         error_message("socket bind error");
-    if (listen(server_sock, 5) == SOCKET_ERROR)
+        exit(1);
+    }
+    if (listen(server_sock, 5) == SOCKET_ERROR) {
         error_message("socket listen error");
+        exit(1);
+    }
 
     FD_ZERO(&read);
     FD_SET(server_sock, &read);
@@ -86,15 +97,15 @@ int main(int num, char* input[])
         copy_read = read;
         time.tv_sec = 5;
         time.tv_usec = 5000;
-        sensor = select(0, &copy_read, 0, 0, &time);
+        fdNum = select(0, &copy_read, 0, 0, &time);
 
-        if (sensor == SOCKET_ERROR)
+        if (fdNum == SOCKET_ERROR)
         {
             error_message("select error");
             break;
         }
 
-        if (sensor == 0)
+        if (fdNum == 0)
         {
             puts("continue.....");
             continue;
@@ -106,8 +117,8 @@ int main(int num, char* input[])
             {
                 if (read.fd_array[count] == server_sock)
                 {
-                    client_add_size = sizeof(client_add);
-                    client_sock = accept(server_sock, (SOCKADDR*)&client_add, &client_add_size);
+                    client_addr_size = sizeof(client_addr);
+                    client_sock = accept(server_sock, (SOCKADDR*)&client_addr, &client_addr_size);
                     FD_SET(client_sock, &read);
                     printf("%d : socket is connected\n", client_sock);
                 }
@@ -124,7 +135,6 @@ int main(int num, char* input[])
                     else
                     {
                         if (strncmp(memory_buf, query, 5) == 0) {
-                            //Current_temperature = refresh_temp(Current_temperature);
                             sprintf(returnMessage_buf, "Current temperature = %d\nUpper bound = %d\nLower bound = %d\n",
                                 Current_temperature, Upper_bound, Lower_bound);
                         }
