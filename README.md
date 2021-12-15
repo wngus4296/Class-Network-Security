@@ -39,6 +39,7 @@
 * 요구사항에 맞춘 클라이언트/서버 모델 설계 및 네트워크 프로그래밍 능력 함양
 * 사물인터넷 환경을 가정한 ‘Smart Home System’ 원격 설정 시뮬레이션 구현
 * 서버 측 Coordinator, 클라이언트 측 Commander와 Monitor 구현
+* 서버 먼저 실행 후 클라이언트 실행
 
 ```
 > Coordinator.exe 8080
