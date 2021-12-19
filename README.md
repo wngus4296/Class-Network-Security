@@ -43,6 +43,6 @@
 
 ```
 > Coordinator.exe 8080
-> Commander 127.0.0.1 8080
-> Monitor 127.0.0.1 8080
+> Commander.exe 127.0.0.1 8080
+> Monitor.exe 127.0.0.1 8080
 ```
