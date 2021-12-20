@@ -63,16 +63,13 @@ int main(int argc, char* argv[])
 
     if (argc != 2) {
         error_message("input error");
-        exit(1);
     }
     if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0) {
         error_message("socket init error");
-        exit(1);
     }
     server_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (server_sock == INVALID_SOCKET) {
         error_message("socket descriptor error");
-        exit(1);
     }
 
     memset(&server_addr, 0, sizeof(server_addr));
@@ -82,11 +79,9 @@ int main(int argc, char* argv[])
 
     if (bind(server_sock, (SOCKADDR*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
         error_message("socket bind error");
-        exit(1);
     }
     if (listen(server_sock, 5) == SOCKET_ERROR) {
         error_message("socket listen error");
-        exit(1);
     }
 
     FD_ZERO(&read);
