@@ -3,51 +3,52 @@
 
 int main(int argc, char* argv[])
 {
-    int sockfd, n;    // sockfd ¼ÒÄÏ µğ½ºÅ©¸³ÅÍ (¹øÈ£Ç¥), nÀº ½Ã°£ Á¤º¸ÀÇ Å©±â (¹ÙÀÌÆ® ´ÜÀ§)
-    char recvline[MAXLINE + 1]; // ¼­¹ö·ÎºÎÅÍ ¹ŞÀ» ½Ã°£ Á¤º¸¸¦ ÀúÀåÇÒ ¹öÆÛ
+    int sockfd, n;    // sockfd ì†Œì¼“ ë””ìŠ¤í¬ë¦½í„° (ë²ˆí˜¸í‘œ), nì€ ì‹œê°„ ì •ë³´ì˜ í¬ê¸° (ë°”ì´íŠ¸ ë‹¨ìœ„)
+    char recvline[MAXLINE + 1]; // ì„œë²„ë¡œë¶€í„° ë°›ì„ ì‹œê°„ ì •ë³´ë¥¼ ì €ì¥í•  ë²„í¼
 
-    char buff[MAXLINE];   // server¿¡ º¸³¾ ³»¿ëÀ» ÀúÀåÇÏ´Â buffer
-    char message[20]; // client¿¡¼­ º¸³¾ ¸Ş½ÃÁö
+    char buff[MAXLINE];   // serverì— ë³´ë‚¼ ë‚´ìš©ì„ ì €ì¥í•˜ëŠ” buffer
+    char message[20]; // clientì—ì„œ ë³´ë‚¼ ë©”ì‹œì§€
 
-    struct sockaddr_in servaddr; // ¼­¹öÀÇ ÁÖ¼Ò¸¦ ÀúÀåÇÑ ÀÎÅÍ³İ ¼ÒÄÏ ÁÖ¼Ò ±¸Á¶Ã¼
-    // ¼­¹öÀÇ IP ÁÖ¼Ò°¡ ÀÎÀÚ·Î ÁÖ¾îÁ³´ÂÁö¸¦ Ã¼Å©
+    struct sockaddr_in servaddr; // ì„œë²„ì˜ ì£¼ì†Œë¥¼ ì €ì¥í•œ ì¸í„°ë„· ì†Œì¼“ ì£¼ì†Œ êµ¬ì¡°ì²´
+    // ì„œë²„ì˜ IP ì£¼ì†Œê°€ ì¸ìë¡œ ì£¼ì–´ì¡ŒëŠ”ì§€ë¥¼ ì²´í¬
     if (argc != 2)
         printf("usage: %s <IPaddress>", argv[0]);
 #ifdef _WIN32
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);//Windows Sockets API Version 2.2
 #endif
-    // TCP ¼ÒÄÏÀ» »ı¼ºÇØ socket descriptor¸¦ ¹Ş¾Æ¿Í¼­ sockfd¿¡ ÀúÀå
+    // TCP ì†Œì¼“ì„ ìƒì„±í•´ socket descriptorë¥¼ ë°›ì•„ì™€ì„œ sockfdì— ì €ì¥
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         printf("socket error");
-    // ¼­¹ö ÁÖ¼Ò¿¡ ´ëÇÑ ±¸Á¶Ã¼ servaddr¿¡ ÁÖ¼Ò¸¦ ¼³Á¤ÇÔ
-    bzero(&servaddr, sizeof(servaddr)); // 0À¸·Î Ã¤¿ò
-    servaddr.sin_family = AF_INET; // Internet Protocol Suite¸¦ »ç¿ë
+    // ì„œë²„ ì£¼ì†Œì— ëŒ€í•œ êµ¬ì¡°ì²´ servaddrì— ì£¼ì†Œë¥¼ ì„¤ì •í•¨
+    bzero(&servaddr, sizeof(servaddr)); // 0ìœ¼ë¡œ ì±„ì›€
+    servaddr.sin_family = AF_INET; // Internet Protocol Suiteë¥¼ ì‚¬ìš©
     servaddr.sin_port = htons(1007); /* message change server port number */
     if (inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0)
-        printf("inet_pton error for %s", argv[1]); // (argv[1] ¹®ÀÚ¿­)¿¡ ÀúÀåµÈ dotted 
-        // decimal Çü½ÄÀÇ ¼­¹ö ÁÖ¼Ò¸¦ 32ºñÆ® ÀÌÁø¼ö·Î º¯È¯
-        // servaddr¿¡ ÀúÀåµÈ ÁÖ¼Ò·Î ¿¬°áÀ» ½ÃµµÇÔ
+        printf("inet_pton error for %s", argv[1]); // (argv[1] ë¬¸ìì—´)ì— ì €ì¥ëœ dotted 
+        // decimal í˜•ì‹ì˜ ì„œë²„ ì£¼ì†Œë¥¼ 32ë¹„íŠ¸ ì´ì§„ìˆ˜ë¡œ ë³€í™˜
+        // servaddrì— ì €ì¥ëœ ì£¼ì†Œë¡œ ì—°ê²°ì„ ì‹œë„í•¨
     if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) < 0)
         printf("connect error");
 
     strcpy_s(message, "hello server\0");
     snprintf(buff, sizeof(buff), "%.24s\r\n", message);
-    // ¼ö¸³µÈ ¿¬°á¿¡ ´ëÇÑ socket descriptorÀÎ sockfd¿¡ ¸Ş½ÃÁö ±â·Ï
+    // ìˆ˜ë¦½ëœ ì—°ê²°ì— ëŒ€í•œ socket descriptorì¸ sockfdì— ë©”ì‹œì§€ ê¸°ë¡
 
-    if (send(sockfd, buff, strlen(buff), 0) != strlen(buff)) // server¿¡°Ô message º¸³¿
+    if (send(sockfd, buff, strlen(buff), 0) != strlen(buff)) // serverì—ê²Œ message ë³´ëƒ„
         printf("send error");
 
-    // ¿¬°áµÈ ¼ÒÄÏÀ» ÅëÇØ ¼­¹ö°¡ º¸³½ ¹ÙÀÌÆ® ¿­ (Áï, ÀĞÀ» ¹®Àå)ÀÌ ÀÖÀ¸¸é
-    while ((n = recv(sockfd, recvline, MAXLINE, 0)) > 0) { // ÀÌ¸¦ recvline¿¡ ÀúÀåÇÔ
-        recvline[n] = 0; // buffer overflow¸¦ ¸·±â À§ÇØ ¸¶Áö¸· ±ÛÀÚ´Â ³Î Ä³¸¯ÅÍ·Î ¹Ù²Ş
-        if (fputs(recvline, stdout) == EOF) // stdout¿¡ recvlineÀ» ¹Ğ¾î³ÖÀ½
-            printf("fputs error"); // ÄÚµå ±¸Á¶ »ó fputsÀÇ °á°ú°¡ EOF°¡ ³ª¿Ã ¼ö ¾øÀ½
+    // ì—°ê²°ëœ ì†Œì¼“ì„ í†µí•´ ì„œë²„ê°€ ë³´ë‚¸ ë°”ì´íŠ¸ ì—´ (ì¦‰, ì½ì„ ë¬¸ì¥)ì´ ìˆìœ¼ë©´
+    // êµ³ì´ whileë¬¸ ì•ˆì¨ë„ ë¨! í•œ ë²ˆë§Œ ë°›ì„ ê²ƒì´ê¸° ë•Œë¬¸
+    while ((n = recv(sockfd, recvline, MAXLINE, 0)) > 0) { // ì´ë¥¼ recvlineì— ì €ì¥í•¨
+        recvline[n] = 0; // buffer overflowë¥¼ ë§‰ê¸° ìœ„í•´ ë§ˆì§€ë§‰ ê¸€ìëŠ” ë„ ìºë¦­í„°ë¡œ ë°”ê¿ˆ
+        if (fputs(recvline, stdout) == EOF) // stdoutì— recvlineì„ ë°€ì–´ë„£ìŒ
+            printf("fputs error"); // ì½”ë“œ êµ¬ì¡° ìƒ fputsì˜ ê²°ê³¼ê°€ EOFê°€ ë‚˜ì˜¬ ìˆ˜ ì—†ìŒ
     }
-    if (n < 0) // Á¤»óÀûÀÌ¾ú´Ù¸é n == 0ÀÌ¾î¾ß ÇÏ¸ç, n < 0ÀÌ¸é while ·çÇÁ¿¡ ¹®Á¦°¡ ÀÖ¾úÀ½
+    if (n < 0) // ì •ìƒì ì´ì—ˆë‹¤ë©´ n == 0ì´ì–´ì•¼ í•˜ë©°, n < 0ì´ë©´ while ë£¨í”„ì— ë¬¸ì œê°€ ìˆì—ˆìŒ
         printf("read error");
 #ifdef _WIN32
-    WSACleanup(); // Winsock »ç¿ë ÈÄ Á¤¸®
+    WSACleanup(); // Winsock ì‚¬ìš© í›„ ì •ë¦¬
 #endif
     exit(0);
 }
